@@ -1,0 +1,40 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        ruby-version: ['3.1', '3.2', '3.3']
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Ruby ${{ matrix.ruby-version }}
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: ${{ matrix.ruby-version }}
+          bundler-cache: true
+
+      - name: Install ImageMagick
+        run: sudo apt-get install -y imagemagick
+
+      - name: Download test models
+        run: |
+          mkdir -p ~/.siglip2_models/base-patch16-224/fp32
+          curl -L -o ~/.siglip2_models/base-patch16-224/fp32/vision_model.onnx \
+            "https://huggingface.co/onnx-community/siglip2-base-patch16-224-ONNX/resolve/main/onnx/vision_model.onnx"
+          curl -L -o ~/.siglip2_models/base-patch16-224/fp32/text_model.onnx \
+            "https://huggingface.co/onnx-community/siglip2-base-patch16-224-ONNX/resolve/main/onnx/text_model.onnx"
+          curl -L -o ~/.siglip2_models/base-patch16-224/fp32/tokenizer.json \
+            "https://huggingface.co/onnx-community/siglip2-base-patch16-224-ONNX/resolve/main/tokenizer.json"
+
+      - name: Run tests
+        run: bundle exec rspec

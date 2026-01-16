@@ -1,5 +1,8 @@
 # SigLIP2-rb
 
+[![CI](https://github.com/khasinski/siglip2-rb/actions/workflows/ci.yml/badge.svg)](https://github.com/khasinski/siglip2-rb/actions/workflows/ci.yml)
+[![Gem Version](https://badge.fury.io/rb/siglip2-rb.svg)](https://rubygems.org/gems/siglip2-rb)
+
 Ruby implementation of Google's SigLIP2 (Sigmoid Loss for Language Image Pre-Training 2) for creating text and image embeddings. Uses ONNX models from HuggingFace [onnx-community](https://huggingface.co/onnx-community).
 
 ## What is this for?
