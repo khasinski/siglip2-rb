@@ -2,6 +2,18 @@
 
 Ruby implementation of Google's SigLIP2 (Sigmoid Loss for Language Image Pre-Training 2) for creating text and image embeddings. Uses ONNX models from HuggingFace [onnx-community](https://huggingface.co/onnx-community).
 
+## What is this for?
+
+SigLIP2 creates numerical representations (embeddings) of images and text in the same vector space. This means you can directly compare text with images using cosine similarity.
+
+**Common use cases:**
+
+- **Image search** - find images matching a text query without manual tagging
+- **Content moderation** - detect unwanted content by comparing against text descriptions ("violence", "nudity", etc.)
+- **Image clustering** - group similar images by comparing their embeddings
+- **Duplicate detection** - find near-duplicate images in large collections
+- **Auto-tagging** - assign labels to images by finding best matching text descriptions
+
 ## Installation
 
 Add this line to your application's Gemfile:
@@ -88,6 +100,58 @@ siglip2-embed-text -l
 
 ```bash
 siglip2-embed-text -L
+```
+
+## Use Case Examples
+
+### Image Search
+
+```ruby
+model = Siglip2::Model.new
+
+# Pre-compute embeddings for all images (store in database)
+image_embeddings = images.map { |path| [path, model.encode_image(path)] }
+
+# Search by text query
+query_embedding = model.encode_text("sunset over mountains")
+results = image_embeddings
+  .map { |path, emb| [path, dot_product(query_embedding, emb)] }
+  .sort_by { |_, score| -score }
+  .first(10)
+```
+
+### Content Moderation
+
+```ruby
+model = Siglip2::Model.new
+
+# Define unwanted content categories
+categories = ["violence", "gore", "nudity", "drugs"]
+category_embeddings = categories.map { |c| model.encode_text(c) }
+
+# Check uploaded image
+image_emb = model.encode_image(uploaded_file)
+scores = category_embeddings.map { |ce| dot_product(image_emb, ce) }
+
+if scores.max > 0.25  # threshold
+  flag_for_review(uploaded_file)
+end
+```
+
+### Auto-tagging
+
+```ruby
+model = Siglip2::Model.new
+
+tags = ["cat", "dog", "car", "landscape", "portrait", "food"]
+tag_embeddings = tags.map { |t| [t, model.encode_text("a photo of #{t}")] }
+
+image_emb = model.encode_image("photo.jpg")
+matched_tags = tag_embeddings
+  .map { |tag, emb| [tag, dot_product(image_emb, emb)] }
+  .select { |_, score| score > 0.2 }
+  .map(&:first)
+# => ["cat"]
 ```
 
 ## Available Models
