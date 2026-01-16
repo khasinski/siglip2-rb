@@ -41,33 +41,22 @@ module Siglip2
     end
 
     def encode_text(text)
-      input_ids, attention_mask = tokenize(text)
+      input_ids = tokenize(text)
 
-      output = text_model.run(
-        nil,
-        {
-          "input_ids" => input_ids,
-          "attention_mask" => attention_mask
-        }
-      )
+      output = text_model.predict({ "input_ids" => input_ids })
 
-      # Extract embeddings - output format depends on model
-      embeddings = extract_embeddings(output)
+      # Extract pooler_output embeddings
+      embeddings = output["pooler_output"].flatten
       normalize_embeddings(embeddings)
     end
 
     def encode_image(image_path)
       pixel_values = @image_preprocessor.preprocess(image_path)
 
-      output = vision_model.run(
-        nil,
-        {
-          "pixel_values" => pixel_values
-        }
-      )
+      output = vision_model.predict({ "pixel_values" => pixel_values })
 
-      # Extract embeddings
-      embeddings = extract_embeddings(output)
+      # Extract pooler_output embeddings
+      embeddings = output["pooler_output"].flatten
       normalize_embeddings(embeddings)
     end
 
@@ -102,7 +91,7 @@ module Siglip2
     end
 
     def tokenize(text)
-      # SigLIP2 uses Gemma tokenizer - lowercase and add EOS
+      # SigLIP2 uses Gemma tokenizer - lowercase text
       processed_text = text.downcase
 
       encoding = tokenizer.encode(processed_text)
@@ -112,36 +101,13 @@ module Siglip2
       max_length = 64
       if input_ids.length > max_length
         input_ids = input_ids[0...max_length]
-      end
-
-      # Create attention mask (1 for real tokens, 0 for padding)
-      attention_mask = Array.new(input_ids.length, 1)
-
-      # Pad if necessary
-      if input_ids.length < max_length
+      elsif input_ids.length < max_length
         padding_length = max_length - input_ids.length
-        input_ids += Array.new(padding_length, 0)  # 0 is typically pad token
-        attention_mask += Array.new(padding_length, 0)
+        input_ids += Array.new(padding_length, 0)  # 0 is pad token
       end
 
-      # Return as 2D arrays (batch size = 1)
-      [[input_ids], [attention_mask]]
-    end
-
-    def extract_embeddings(output)
-      # ONNX output is typically a hash with output names as keys
-      # SigLIP2 models output pooler_output or last_hidden_state
-      result = output.first
-      if result.is_a?(Hash)
-        # Try common output names
-        embedding = result["pooler_output"] || result["last_hidden_state"] || result.values.first
-      else
-        embedding = result
-      end
-
-      # Flatten to 1D array if needed
-      embedding = embedding.flatten if embedding.is_a?(Array) && embedding[0].is_a?(Array)
-      embedding
+      # Return as 2D array (batch size = 1) with int64 type
+      [input_ids]
     end
 
     def normalize_embeddings(embeddings)
