@@ -1,0 +1,59 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+require "siglip2"
+require "optparse"
+require "json"
+
+options = {
+  model: Siglip2::DEFAULT_MODEL,
+  quantization: Siglip2::DEFAULT_QUANTIZATION
+}
+
+parser = OptionParser.new do |opts|
+  opts.banner = "Usage: siglip2-similarity [options] TEXT IMAGE_PATH"
+
+  opts.on("-m", "--model MODEL", "Model name (default: #{Siglip2::DEFAULT_MODEL})") do |m|
+    options[:model] = m
+  end
+
+  opts.on("-q", "--quantization QUANT", "Quantization (default: #{Siglip2::DEFAULT_QUANTIZATION})") do |q|
+    options[:quantization] = q
+  end
+
+  opts.on("-l", "--list-models", "List available models") do
+    puts "Available models:"
+    Siglip2.list_models.each { |m| puts "  #{m}" }
+    exit
+  end
+
+  opts.on("-h", "--help", "Show this help message") do
+    puts opts
+    exit
+  end
+end
+
+parser.parse!
+
+if ARGV.length < 2
+  puts parser
+  exit 1
+end
+
+text = ARGV[0]
+image_path = ARGV[1]
+
+unless File.exist?(image_path)
+  warn "Error: Image file not found: #{image_path}"
+  exit 1
+end
+
+begin
+  model = Siglip2::Model.new(model_name: options[:model], quantization: options[:quantization])
+  score = model.similarity(text, image_path)
+
+  puts "Similarity score: #{score}"
+rescue Siglip2::Error => e
+  warn "Error: #{e.message}"
+  exit 1
+end
