@@ -3,7 +3,7 @@
 require_relative "lib/siglip2/version"
 
 Gem::Specification.new do |spec|
-  spec.name = "siglip2-rb"
+  spec.name = "siglip2"
   spec.version = Siglip2::VERSION
   spec.authors = ["Krzysztof Hasiński"]
   spec.email = ["krzysztof.hasinski@gmail.com"]

@@ -1,7 +1,7 @@
 # SigLIP2-rb
 
 [![CI](https://github.com/khasinski/siglip2-rb/actions/workflows/ci.yml/badge.svg)](https://github.com/khasinski/siglip2-rb/actions/workflows/ci.yml)
-[![Gem Version](https://badge.fury.io/rb/siglip2-rb.svg)](https://rubygems.org/gems/siglip2-rb)
+[![Gem Version](https://badge.fury.io/rb/siglip2.svg)](https://rubygems.org/gems/siglip2)
 
 Ruby implementation of Google's SigLIP2 (Sigmoid Loss for Language Image Pre-Training 2) for creating text and image embeddings. Uses ONNX models from HuggingFace [onnx-community](https://huggingface.co/onnx-community).
 
@@ -22,13 +22,13 @@ SigLIP2 creates numerical representations (embeddings) of images and text in the
 Add this line to your application's Gemfile:
 
 ```ruby
-gem 'siglip2-rb'
+gem 'siglip2'
 ```
 
 Or install directly:
 
 ```bash
-gem install siglip2-rb
+gem install siglip2
 ```
 
 ### Requirements
