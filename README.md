@@ -9,6 +9,8 @@ Ruby implementation of Google's SigLIP2 (Sigmoid Loss for Language Image Pre-Tra
 
 SigLIP2 creates numerical representations (embeddings) of images and text in the same vector space. This means you can directly compare text with images using cosine similarity.
 
+**SigLIP2 is multilingual** - it understands text in multiple languages out of the box, so you can search images using queries in English, Polish, German, Japanese, etc.
+
 **Common use cases:**
 
 - **Image search** - find images matching a text query without manual tagging
